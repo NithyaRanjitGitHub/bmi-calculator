@@ -7,16 +7,22 @@ trigger:
 - main
 
 pool:
-  name: Default
+  name: Default   # Use your self-hosted agent pool
 
 steps:
-- task: Maven@3
+- script: mvn clean package -Xmx3072m
+  displayName: 'Build and Package with Maven'
+
+- script: mvn test
+  displayName: 'Run Unit Tests'
+
+- task: PublishTestResults@2
   inputs:
-    mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.17'
-    jdkArchitectureOption: 'x64'
-    publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'package'
+    testRunTitle: 'Maven Unit Tests'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(System.DefaultWorkingDirectory)/target'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
