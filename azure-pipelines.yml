@@ -10,7 +10,7 @@ pool:
   name: Default   # Use your self-hosted agent pool
 
 steps:
-- script: mvn clean package -Xmx3072m
+- script: mvn clean package -DargLine="-Xmx3072m"
   displayName: 'Build and Package with Maven'
 
 - script: mvn test
