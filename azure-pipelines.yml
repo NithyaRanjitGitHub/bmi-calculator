@@ -1,28 +1,25 @@
-# Maven
-# Build your Java project and run tests with Apache Maven.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/java
-
 trigger:
 - main
 
 pool:
-  name: Default   # Use your self-hosted agent pool
+  vmImage: 'ubuntu-latest'
 
 steps:
-- script: mvn clean package -DargLine="-Xmx3072m"
-  displayName: 'Build and Package with Maven'
+- checkout: self
 
-- script: mvn test
-  displayName: 'Run Unit Tests'
-
-- task: PublishTestResults@2
+# Run Maven build & tests
+- task: Maven@4
   inputs:
+    mavenPomFile: 'BMI-Calculator/pom.xml'
+    goals: 'package'
+    mavenVersionOption: 'Default'
+    publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    testRunTitle: 'Maven Unit Tests'
 
-- task: PublishBuildArtifacts@1
+# Publish build artifacts
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish build artifact'
   inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)/target'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
+    targetPath: '$(System.DefaultWorkingDirectory)/BMI-Calculator/target'
+    artifact: 'maven-build'
+    publishLocation: 'pipeline'
